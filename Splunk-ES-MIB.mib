@@ -1,0 +1,90 @@
+-- *****************************************************************
+-- Splunk-Security-MIB.mib:  Management Information Base (MIB) for sending alerts to OpenNMS,
+---                          based on Splunk Enterprise Security Notable Events
+--
+-- August 2022,  Lukas Elflein
+--
+-- Copyright (c) 2022 50Hertz Transmission GmbH
+-- All rights reserved.
+-- *****************************************************************
+
+Splunk-ES-MIB DEFINITIONS ::= BEGIN
+IMPORTS
+     MODULE-IDENTITY, OBJECT-TYPE, enterprises, NOTIFICATION-TYPE    FROM SNMPv2-SMI
+     OBJECT-GROUP, NOTIFICATION-GROUP                                FROM SNMPv2-CONF
+;
+
+splunk MODULE-IDENTITY
+     LAST-UPDATED "202208240000Z"
+     ORGANIZATION "50Hertz Transmission GmbH"
+     CONTACT-INFO
+          "50Hertz NMC
+           EMail: nmc@50Hertz.com
+	   50Hertz IT-Security
+	   it-security@50hertz.com"
+     DESCRIPTION
+          "MIB for Splunk servers to send custom alarms to openNMS servers"
+     REVISION     "202208240000Z"
+     DESCRIPTION
+          "Proof of Concept"
+     ::= { enterprises 27389 }
+ 
+splunkIncident		OBJECT IDENTIFIER ::= { splunk 1000 }
+
+incidentAlerts		OBJECT IDENTIFIER ::= { splunkIncident 0 }
+splunkIncidentGroups 	OBJECT IDENTIFIER ::= { splunkIncident 1 }
+
+incidentAlertsObjects   OBJECT IDENTIFIER ::= { incidentAlerts 2 }
+
+--
+--   GROUPS
+--
+
+rbObjectGroup OBJECT-GROUP
+     OBJECTS 	{ splunkIncidentAlertTitle,
+                  splunkIncidentAlertText }
+     STATUS	current
+     DESCRIPTION
+          "A collection containing the title and text of alerts."
+     ::= { splunkIncidentGroups 1 }
+
+rbNotiGroup NOTIFICATION-GROUP
+     NOTIFICATIONS { splunkIncidentAlertNotification }
+     STATUS          current
+     DESCRIPTION
+          "An abstraction for notifications."
+     ::= { splunkIncidentGroups 2 }
+
+--
+--   NOTIFICATIONS
+--
+
+splunkIncidentAlertTitle OBJECT-TYPE
+     SYNTAX          	OCTET STRING
+     MAX-ACCESS 	accessible-for-notify
+     STATUS          	current
+     DESCRIPTION
+          "A string that contains the notification title"
+     ::= { incidentAlertsObjects 1 }
+
+splunkIncidentAlertText OBJECT-TYPE
+     SYNTAX          OCTET STRING
+     MAX-ACCESS      accessible-for-notify
+     STATUS          current
+     DESCRIPTION
+          "A string that contains the notification payload; This contains incident-specific info."
+::= { incidentAlertsObjects 2 }
+
+splunkIncidentAlertNotification NOTIFICATION-TYPE
+     OBJECTS         { splunkIncidentAlertTitle, splunkIncidentAlertText }
+     STATUS          current
+     DESCRIPTION
+          "A notification for SplunkES incidents "
+::= { incidentAlerts 1 }
+    
+END
+
+ 
+
+ 
+
